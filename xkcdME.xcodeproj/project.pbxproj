@@ -45,6 +45,11 @@
 			path = xkcdMEUITests;
 			sourceTree = "<group>";
 		};
+		B8EE0C2B2DC96FD200420CF7 /* Supporting */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Supporting;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				B8EE0BFB2DC968E000420CF7 /* xkcdME */,
+				B8EE0C2B2DC96FD200420CF7 /* Supporting */,
 				B8EE0C092DC968E100420CF7 /* xkcdMETests */,
 				B8EE0C132DC968E100420CF7 /* xkcdMEUITests */,
 				B8EE0BFA2DC968E000420CF7 /* Products */,
@@ -109,6 +115,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				B8EE0BFB2DC968E000420CF7 /* xkcdME */,
+				B8EE0C2B2DC96FD200420CF7 /* Supporting */,
 			);
 			name = xkcdME;
 			packageProductDependencies = (
