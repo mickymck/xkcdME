@@ -8,25 +8,52 @@
 import SwiftUI
 
 struct MyComicView: View {
-    @State private var comicNumber: Int = 600
-    private var viewModel: MyComicViewModel = MyComicViewModel()
+    @State private var comicNumber: Int?
+    @ObservedObject private var viewModel: MyComicViewModel = MyComicViewModel()
     
     var body: some View {
         VStack {
-            Text("xkcd")
-            Button("Fetch Comic") {
-                // TODO: Fetch the comic - need VM and @State wrapped textfield
-                Task {
-                    await viewModel.load(comic: comicNumber)
+            if let myComic = viewModel.comic {
+                AsyncImage(url: URL(string: myComic.img)) { phase in
+                    switch phase {
+                    case .empty:
+                        // TODO: better to determine state in VM rather than based on AsyncImage phase?
+                        ProgressView()
+                            .scaleEffect(2.0, anchor: .center)
+                    case .success(let image):
+                        comicView(title: myComic.title, image: image)
+                    case .failure(let error):
+                        Text("Error loading Comic: \(error.localizedDescription)")
+                    @unknown default:
+                        Text("Error loading Comic")
+                    }
                 }
             }
-            if let myComic = viewModel.comic {
-                Text(myComic.title)
-                    .font(.title)
-                    .padding()
-            }
+            Spacer()
+            TextField("Comic Number", value: $comicNumber, formatter: NumberFormatter())
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .keyboardType(.numberPad)
+                .submitLabel(.go)
+                .onSubmit {
+                    Task {
+                        guard let number = comicNumber else { return }
+                        await viewModel.load(comic: number)
+                    }
+                }
         }
-        .padding()
+        .padding(24)
+    }
+    
+    @ViewBuilder
+    private func comicView(title: String, image: Image) -> some View {
+        VStack(spacing: 16) {
+            Text(title)
+                .font(.largeTitle)
+            image
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+        }
     }
 }
 
