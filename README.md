@@ -33,3 +33,5 @@
 </ol>
 
 <b>note:</b> https://xkcd.com/info.0.json is the current comic, and it has a "num" value that can give me the total number of comics, so I can prevent the user from entering a number that is too large
+
+<b>note:</b> Think about @Observable instead of @ObservableObject so all props are Published?
