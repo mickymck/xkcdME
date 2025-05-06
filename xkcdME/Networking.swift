@@ -33,9 +33,14 @@ final class Networking {
     
     private init() {}
     
-    func fetchComic(number: Int) async throws -> Comic {
+    func fetchComic(number: Int? = nil) async throws -> Comic {
         // TODO: get rid of hard-coded string here?
-        let urlString = "https://xkcd.com/\(number)/info.0.json"
+        var urlString = "https://xkcd.com/info.0.json"
+        
+        if let number {
+            urlString = "https://xkcd.com/\(number)/info.0.json"
+        }
+        
         guard let url = URL(string: urlString) else {
             throw ComicError.badURL
         }

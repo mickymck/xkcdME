@@ -11,7 +11,7 @@ import SwiftUI
 struct xkcdMEApp: App {
     var body: some Scene {
         WindowGroup {
-            MyComicView()
+            XkcdMe()
         }
     }
 }
