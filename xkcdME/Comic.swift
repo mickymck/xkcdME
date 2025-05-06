@@ -10,4 +10,5 @@ import Foundation
 class Comic: Codable {
     let num: Int
     let title: String
+    let img: String
 }
