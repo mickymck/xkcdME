@@ -9,12 +9,8 @@ import SwiftUI
 
 struct XkcdMe: View {
     @State private var comicNumber: Int?
-    @State private var showComic: Bool = false {
-        didSet {
-            print("isPresented: \(showComic)")
-        }
-    }
-    @StateObject private var viewModel: MyComicViewModel = MyComicViewModel()
+    @State private var showComic: Bool = false
+    @StateObject private var viewModel = MyComicViewModel()
     
     var body: some View {
         NavigationStack {
@@ -56,13 +52,13 @@ sarcasm, math, and language.
     
     @ViewBuilder
     private func initialComic() -> some View {
-        if let myComic = viewModel.currentComic {
+        if let myComic = viewModel.initialComic {
             MyComicView(myComic: myComic)
         } else {
             ProgressView()
                 .scaleEffect(2.0, anchor: .center)
                 .task {
-                    await viewModel.loadInitialComic()
+                    _ = viewModel.loadInitialComic()
                 }
         }
     }

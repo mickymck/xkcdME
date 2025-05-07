@@ -14,9 +14,6 @@ struct MyComicView: View {
         VStack {
             ComicView(myComic: myComic)
         }
-        .task {
-            print("MyComicView()")
-        }
         .padding()
     }
 }
