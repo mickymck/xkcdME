@@ -70,9 +70,10 @@ final class MyComicViewModel: ObservableObject {
         }
     }
     
+    // TODO: make this non-optional?
     func isBadNumber(input: Int) -> Bool? {
         if let initialComic {
-            return input > initialComic.num
+            return (input > initialComic.num || input < 1)
         }
         return nil
     }

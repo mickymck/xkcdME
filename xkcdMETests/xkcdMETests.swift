@@ -70,7 +70,8 @@ struct xkcdMETests {
             #expect(errorViewModel.state == .error)
         }
         
-        @Test func testHighNumber() async throws {
+        // TODO: pass in three numbers - high, 0, negative - as params all with same result
+        @Test func testBadNumbers() async throws {
             let initialComicViewModel = MyComicViewModel(networking: MockNetworking(result: .success(initialComic)))
 
             let initialTask = await initialComicViewModel.loadInitialComic()
