@@ -10,14 +10,14 @@ import SwiftUI
 struct ComicView: View {
     let myComic: Comic
     var body: some View {
-        AsyncImage(url: URL(string: myComic.img)) { phase in
+        AsyncImage(url: URL(string: myComic.imageUrl)) { phase in
             switch phase {
             case .empty:
                 // TODO: better to determine state in VM rather than based on AsyncImage phase?
                 ProgressView()
                     .scaleEffect(2.0, anchor: .center)
             case .success(let image):
-                comicView(title: myComic.title, image: image)
+                comicView(title: myComic.title, date: myComic.date, image: image)
             case .failure(let error):
                 Text("Error loading Comic: \(error.localizedDescription)")
             @unknown default:
@@ -27,11 +27,16 @@ struct ComicView: View {
     }
     
     @ViewBuilder
-    private func comicView(title: String, image: Image) -> some View {
+    private func comicView(title: String, date: Date?, image: Image) -> some View {
         ZStack {
             VStack {
                 Text(title)
                     .font(.largeTitle)
+                if let date {
+                    Text(date.formatted(date: .long, time: .omitted))
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
                 Spacer()
             }
             image
@@ -45,9 +50,12 @@ struct ComicView: View {
 #Preview {
     ComicView(
         myComic: Comic(
-            num: 1,
+            number: 1,
             title: "Test Title",
-            img: "https://imgs.xkcd.com/comics/unstoppable_force_and_immovable_object.png"
+            imageUrl: "https://imgs.xkcd.com/comics/unstoppable_force_and_immovable_object.png",
+            month: "6",
+            day: "23",
+            year: "2015"
         )
     )
 }

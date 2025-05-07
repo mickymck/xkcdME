@@ -5,6 +5,7 @@
 //  Created by Micky McKeon on 5/5/25.
 //
 
+import Foundation
 import Testing
 @testable import xkcdME
 
@@ -15,13 +16,19 @@ struct xkcdMETests {
         
         let basicViewModel = MyComicViewModel(networking: Networking.shared)
         
-        let initialComic = Comic(num: 5,
+        let initialComic = Comic(number: 5,
                                  title: "INITIAL Comic",
-                                 img: "https://imgs.xkcd.com/comics/about_20_pounds.png")
+                                 imageUrl: "https://imgs.xkcd.com/comics/about_20_pounds.png",
+                                 month: "10",
+                                 day: "31",
+                                 year: "2000")
         
-        let chosenComic = Comic(num: 55,
+        let chosenComic = Comic(number: 55,
                                 title: "CHOSEN Comic",
-                                img: "https://imgs.xkcd.com/comics/blownapart_color.jpg")
+                                imageUrl: "https://imgs.xkcd.com/comics/blownapart_color.jpg",
+                                month: "5",
+                                day: "5",
+                                year: "2020")
         
         @Test func testOriginalState() async throws {
             #expect(basicViewModel.initialComic == nil)
@@ -70,19 +77,48 @@ struct xkcdMETests {
             #expect(errorViewModel.state == .error)
         }
         
-        // TODO: pass in three numbers - high, 0, negative - as params all with same result
-        @Test func testBadNumbers() async throws {
+        @Test(arguments: [99999999, 0, -55])
+        func testBadNumbers(_ number: Int) async throws {
             let initialComicViewModel = MyComicViewModel(networking: MockNetworking(result: .success(initialComic)))
 
             let initialTask = await initialComicViewModel.loadInitialComic()
             await initialTask.value
-            let chosenTask = await initialComicViewModel.goToComic(99999999)
+            let chosenTask = await initialComicViewModel.goToComic(number)
             await chosenTask.value
             
             #expect(initialComicViewModel.initialComic?.title == initialComic.title)
             #expect(initialComicViewModel.comic == nil)
             #expect(initialComicViewModel.errorMessage == ComicError.badComicNumber.message)
             #expect(initialComicViewModel.state == .error)
+        }
+    }
+    
+    @Suite("Comic Date Tests")
+    struct ComicDateTests {
+        
+        @Test func testGoodDateString() async throws {
+            let date = ComicDate.create(month: "5", day: "5", year: "2020")
+            #expect(date != nil)
+            if let date {
+                #expect(type(of: date) == Date.self)
+            }
+        }
+        
+        @Test func testGoodDateInt() async throws {
+            let date = ComicDate.create(month: 5, day: 5, year: 2020)
+            #expect(date != nil)
+            if let date {
+                #expect(type(of: date) == Date.self)
+            }
+        }
+        
+        @Test(arguments: [("15", "5", "2020"),
+                          ("5", "55", "2020"),
+                          ("5", "5", "2050"),
+                          ("car", "boat", "plane")])
+        func testBadDate(_ date: (month: String, day: String, year: String)) async throws {
+            let date = ComicDate.create(month: date.month, day: date.day, year: date.year)
+            #expect(date == nil)
         }
     }
 }

@@ -21,9 +21,12 @@ struct MyComicView: View {
 #Preview {
     MyComicView(
         myComic: Comic(
-            num: 1,
+            number: 1,
             title: "Test Title",
-            img: "https://imgs.xkcd.com/comics/unstoppable_force_and_immovable_object.png"
+            imageUrl: "https://imgs.xkcd.com/comics/unstoppable_force_and_immovable_object.png",
+            month: "1",
+            day: "55",
+            year: "2013"
         )
     )
 }
