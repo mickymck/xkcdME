@@ -32,6 +32,18 @@
   <li>write some unit tests with injected mock data</li>
 </ol>
 
-<b>note:</b> https://xkcd.com/info.0.json is the current comic, and it has a "num" value that can give me the total number of comics, so I can prevent the user from entering a number that is too large
+## Step 5: Cleanup
 
-<b>note:</b> Think about @Observable instead of @ObservableObject so all props are Published?
+<ol>
+  <li>answer assignment questions in README</li>
+  <li>handle errors better for the user - specifically around number rules</li>
+  <li>remove any TODOs from the code</li>
+  <li>confirm all operations are running on proper threads and are async if necessary</li>
+  <li>better UI for the textField and Button</li>
+</ol>
+
+## Stretch
+
+<ol>
+  <li>search by date? could be fun!</li>
+</ol>
