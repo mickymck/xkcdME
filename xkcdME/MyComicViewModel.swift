@@ -17,33 +17,31 @@ enum ComicLoadingState {
     case error
 }
 
-@MainActor
 @Observable
 final class MyComicViewModel: ObservableObject {
-    var currentComic: Comic?
-    var comic: Comic? {
-        didSet {
-            print("Comic: \(comic?.title ?? "nil")")
-        }
-    }
+    var initialComic: Comic?
+    var comic: Comic?
     var errorMessage: String?
     var state: ComicLoadingState = .idle
     
+    let networking: ComicFetching
+    
+    init(networking: ComicFetching = Networking.shared) {
+        self.networking = networking
+    }
+    
+    @MainActor
     func load(comic number: Int? = nil) async {
-        state = number == nil ? .loadingInitial : .loading
         do {
             if let number {
-                self.comic = try await Networking.shared.fetchComic(number: number)
+                self.comic = try await networking.fetchComic(number: number)
                 state = .loaded
-                print("Loaded")
             } else {
-                self.currentComic = try await Networking.shared.fetchComic()
+                self.initialComic = try await networking.fetchComic()
                 state = .loadedInitial
-                print("Loaded")
             }
         } catch let comicError as ComicError {
             self.errorMessage = comicError.message
-            print("Error: \(comicError.message)")
             state = .error
         } catch {
             self.errorMessage = ComicError.unknownError.message
@@ -51,14 +49,31 @@ final class MyComicViewModel: ObservableObject {
         }
     }
     
-    func goToComic(_ num: Int) async {
-        print("Go")
-        await load(comic: num)
-        print("Loaded?")
+    @MainActor
+    func loadInitialComic() -> Task<Void, Never> {
+        state = .loadingInitial
+        return Task {
+            await load()
+        }
     }
     
-    func loadInitialComic() async {
-        await load()
+    @MainActor
+    func goToComic(_ num: Int) -> Task<Void, Never> {
+        state = .loading
+        if isBadNumber(input: num) == true {
+            errorMessage = ComicError.badComicNumber.message
+            state = .error
+            return Task {}
+        }
+        return Task {
+            await load(comic: num)
+        }
+    }
+    
+    func isBadNumber(input: Int) -> Bool? {
+        if let initialComic {
+            return input > initialComic.num
+        }
+        return nil
     }
 }
-

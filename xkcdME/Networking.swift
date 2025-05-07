@@ -8,6 +8,7 @@
 import Foundation
 
 enum ComicError: Error {
+    case badComicNumber
     case badURL
     case serverError
     case decodingError
@@ -15,6 +16,8 @@ enum ComicError: Error {
     
     var message: String {
         switch self {
+        case .badComicNumber:
+            return "There is no Comic with that number."
         case .badURL:
             return "The Comic URL is invalid."
         case .serverError:
@@ -26,9 +29,18 @@ enum ComicError: Error {
         }
     }
 }
-    
 
-final class Networking {
+protocol ComicFetching {
+    func fetchComic(number: Int?) async throws -> Comic
+}
+
+extension ComicFetching {
+    func fetchComic() async throws -> Comic {
+        try await fetchComic(number: nil)
+    }
+}
+
+final class Networking: ComicFetching {
     static let shared = Networking()
     
     private init() {}
