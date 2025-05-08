@@ -7,11 +7,7 @@
 
 import Foundation
 
-protocol ComicError: Error, Equatable {
-    var message: String { get }
-}
-
-enum NetworkingError: ComicError {
+enum NetworkingError: Error {
     case badURL
     case serverError
     case decodingError
@@ -27,17 +23,6 @@ enum NetworkingError: ComicError {
             return "Failed to decode the Comic."
         case .unknownError:
             return "There was an unknown Comic error."
-        }
-    }
-}
-
-enum UserInputError: ComicError {
-    case badComicNumber
-    
-    var message: String {
-        switch self {
-        case .badComicNumber:
-            return "There is no Comic with that number."
         }
     }
 }

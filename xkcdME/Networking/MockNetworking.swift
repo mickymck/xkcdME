@@ -1,5 +1,5 @@
 //
-//  MockComicFetch.swift
+//  MockNetworking.swift
 //  xkcdME
 //
 //  Created by Micky McKeon on 5/6/25.

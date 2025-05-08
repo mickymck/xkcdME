@@ -45,7 +45,7 @@ struct xkcdMETests {
             
             await task.value
             #expect(initialComicViewModel.comic?.title == initialComic.title)
-            #expect(initialComicViewModel.userInputError == nil)
+            #expect(initialComicViewModel.error == nil)
             #expect(initialComicViewModel.state == .loaded)
         }
         

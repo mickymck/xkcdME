@@ -14,7 +14,6 @@ struct ComicView: View {
             AsyncImage(url: URL(string: myComic.imageUrl)) { phase in
                 switch phase {
                 case .empty:
-                    // TODO: better to determine state in VM rather than based on AsyncImage phase?
                     ProgressView()
                         .scaleEffect(2.0, anchor: .center)
                 case .success(let image):
@@ -33,23 +32,20 @@ struct ComicView: View {
     @ViewBuilder
     private func comicView(title: String, date: Date?, image: Image) -> some View {
         VStack {
-            VStack {
-                Text(title)
-                    .font(.largeTitle)
-                if let date {
-                    Text(date.formatted(date: .long, time: .omitted))
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
+            Text(title)
+                .font(.largeTitle)
+            if let date {
+                Text(date.formatted(date: .long, time: .omitted))
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
             }
-            .padding(.bottom, 32)
-            image
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-            Spacer()
         }
-        .padding(.top, 32)
+        .padding(.vertical, 32)
+        image
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity)
+        Spacer()
     }
 }
 
