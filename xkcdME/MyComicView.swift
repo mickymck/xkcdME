@@ -8,25 +8,34 @@
 import SwiftUI
 
 struct MyComicView: View {
-    let myComic: Comic
+    let number: Int
+    let viewModel = MyComicViewModel()
 
     var body: some View {
         VStack {
-            ComicView(myComic: myComic)
+            switch viewModel.state {
+            case .loaded:
+                if let comic = viewModel.comic {
+                    ComicView(myComic: comic)
+                }
+            case .error:
+            if let networkingError = viewModel.error as? NetworkingError {
+                Text(networkingError.message)
+                    .font(.body)
+                    .foregroundColor(.red)
+            }
+            case .loading, .idle:
+                ProgressView()
+                    .scaleEffect(2.0, anchor: .center)
+            }
         }
         .padding()
+        .task {
+            _ = await viewModel.getComic(number: number)
+        }
     }
 }
 
 #Preview {
-    MyComicView(
-        myComic: Comic(
-            number: 1,
-            title: "Test Title",
-            imageUrl: "https://imgs.xkcd.com/comics/unstoppable_force_and_immovable_object.png",
-            month: "1",
-            day: "55",
-            year: "2013"
-        )
-    )
+    MyComicView(number: 15)
 }

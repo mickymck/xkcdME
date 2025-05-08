@@ -8,20 +8,10 @@
 import Foundation
 import SwiftUI
 
-enum ComicLoadingState {
-    case idle
-    case loadingInitial
-    case loadedInitial
-    case loading
-    case loaded
-    case error
-}
-
 @Observable
 final class MyComicViewModel: ObservableObject {
-    var initialComic: Comic?
     var comic: Comic?
-    var errorMessage: String?
+    var error: ComicError?
     var state: ComicLoadingState = .idle
     
     let networking: ComicFetching
@@ -31,50 +21,25 @@ final class MyComicViewModel: ObservableObject {
     }
     
     @MainActor
-    func load(comic number: Int? = nil) async {
-        do {
-            if let number {
-                self.comic = try await networking.fetchComic(number: number)
-                state = .loaded
-            } else {
-                self.initialComic = try await networking.fetchComic()
-                state = .loadedInitial
-            }
-        } catch let comicError as ComicError {
-            self.errorMessage = comicError.message
-            state = .error
-        } catch {
-            self.errorMessage = ComicError.unknownError.message
-            state = .error
-        }
-    }
-    
-    @MainActor
-    func loadInitialComic() -> Task<Void, Never> {
-        state = .loadingInitial
-        return Task {
-            await load()
-        }
-    }
-    
-    @MainActor
-    func goToComic(_ num: Int) -> Task<Void, Never> {
+    func getComic(number: Int) async -> Task<Void, Never> {
         state = .loading
-        if isBadNumber(input: num) == true {
-            errorMessage = ComicError.badComicNumber.message
-            state = .error
-            return Task {}
-        }
         return Task {
-            await load(comic: num)
+            await load(comic: number)
         }
     }
     
-    // TODO: make this non-optional?
-    func isBadNumber(input: Int) -> Bool? {
-        if let initialComic {
-            return (input > initialComic.number || input < 1)
+    @MainActor
+    func load(comic number: Int) async {
+        do {
+            self.comic = try await networking.fetchComic(number: number)
+            state = .loaded
+            error = nil
+        } catch let networkingError as NetworkingError {
+            self.error = networkingError
+            state = .error(networkingError)
+        } catch {
+            self.error = NetworkingError.unknownError
+            state = .error(NetworkingError.unknownError)
         }
-        return nil
     }
 }

@@ -9,9 +9,9 @@ import Foundation
 
 final class MockNetworking: ComicFetching {
     
-    let result: Result<Comic, ComicError>
+    let result: Result<Comic, NetworkingError>
     
-    init(result: Result<Comic, ComicError>) {
+    init(result: Result<Comic, NetworkingError>) {
         self.result = result
     }
     

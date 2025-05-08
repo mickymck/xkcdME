@@ -10,27 +10,34 @@ import SwiftUI
 struct XkcdMe: View {
     @State private var comicNumber: Int?
     @State private var showComic: Bool = false
-    @StateObject private var viewModel = MyComicViewModel()
+    @StateObject private var viewModel = XkcdMeViewModel()
     
     var body: some View {
         NavigationStack {
             VStack {
                 header()
-                Spacer()
-                initialComic()
+                Divider()
+                if let comic = viewModel.comic {
+                    ComicView(myComic: comic)
+                }
                 Spacer()
                 searchSection()
                 .navigationDestination(isPresented: $showComic) {
-                    if let myComic = viewModel.comic {
-                        MyComicView(myComic: myComic)
+                    if let comicNumber {
+                        MyComicView(number: comicNumber)
                     }
                 }
-                .padding(24)
+                .navigationTitle("xkcd me")
+                .navigationBarHidden(true)
+            }
+            .padding(24)
+            .onAppear {
+                self.comicNumber = nil
+                Task {
+                    _ = await viewModel.loadInitialComic()
+                }
             }
         }
-        .onChange(of: viewModel.state, { _, newValue in
-            showComic = newValue == .loaded
-        })
     }
     
     @ViewBuilder
@@ -40,57 +47,94 @@ struct XkcdMe: View {
 A webcomic of romance,
 sarcasm, math, and language.
 """
-        VStack {
+        HStack {
             Text("xkcd")
-                .font(.largeTitle)
-                .foregroundColor(.red)
+                .font(Font.custom("American Typewriter", size: 48))
+                .fontWeight(.medium)
+                .foregroundColor(.purple)
+                .padding(.trailing, 8)
             Text(subtitle)
                 .font(.subheadline)
-                .multilineTextAlignment(.center)
         }
     }
     
-    @ViewBuilder
-    private func initialComic() -> some View {
-        if let myComic = viewModel.initialComic {
-            MyComicView(myComic: myComic)
-        } else {
-            ProgressView()
-                .scaleEffect(2.0, anchor: .center)
-                .task {
-                    _ = viewModel.loadInitialComic()
-                }
-        }
-    }
-        
+//    @ViewBuilder
+//    private func mainContentView() -> some View {
+//        switch viewModel.state {
+//        case .loaded:
+//            if let comic = viewModel.comic {
+//                ComicView(myComic: comic)
+//            }
+//        case .error(let error):
+//            Text(error.message)
+//                .font(.body)
+//                .foregroundColor(.red)
+//        case .loading:
+//            ProgressView()
+//                .scaleEffect(2.0, anchor: .center)
+//        case .idle:
+//            EmptyView()
+//        }
+//    }
     
     @ViewBuilder
     private func searchSection() -> some View {
-        HStack {
-            TextField("Comic Number", value: $comicNumber, formatter: NumberFormatter())
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .keyboardType(.numberPad)
-                .frame(width: 200, height: 32)
-            goButton()
+        var placeholderText: String {
+            if let latest = viewModel.comic?.number {
+                return "Comic # 1 - \(latest)"
+            }
+            return "Comic #"
+        }
+        VStack(alignment: .leading) {
+            if let error = viewModel.userInputError {
+                VStack {
+                    Text(error.message)
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                }
+            }
+            
+            GeometryReader { geometry in
+                let totalWidth = geometry.size.width
+                let buttonWidth = totalWidth / 3
+                let textFieldWidth = totalWidth - buttonWidth
+                let sharedHeight: CGFloat = 40
+                
+                HStack(spacing: 8) {
+                    TextField(placeholderText,
+                              value: $comicNumber,
+                              formatter: NumberFormatter())
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.numberPad)
+                    .frame(width: textFieldWidth, height: sharedHeight)
+                    .accessibilityHint("Number of the comic to fetch")
+                    
+                    Button {
+                        checkNumberAndGoToComic()
+                    } label: {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.blue)
+                            Text("xkcd me")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .accessibilityLabel("Fetch comic")
+                        .frame(width: buttonWidth, height: sharedHeight)
+                }
+            }
+            .frame(height: 40)
         }
     }
-        
     
-    @ViewBuilder
-    private func goButton() -> some View {
-        Button {
-            Task {
-                guard let number = comicNumber else { return }
-                await viewModel.goToComic(number)
-            }
-        } label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.blue)
-                    .frame(width: 100, height: 32)
-                Text("xkcd me")
-                    .font(.headline)
-                    .foregroundColor(.white)
+    private func checkNumberAndGoToComic() {
+        if let comicNumber {
+            if viewModel.isBadNumber(input: comicNumber) == true {
+                viewModel.userInputError = .badComicNumber
+            } else {
+                viewModel.userInputError = nil
+                self.showComic = true
             }
         }
     }
