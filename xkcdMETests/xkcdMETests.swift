@@ -14,7 +14,8 @@ struct xkcdMETests {
     @Suite("View Model Tests")
     struct ViewModelStateChangeTests {
         
-        let basicViewModel = MyComicViewModel(networking: Networking.shared)
+        let xkcdHomeViewModel = XkcdHomeViewModel(networking: Networking.shared)
+        let myComicViewModel = MyComicViewModel(networking: Networking.shared)
         
         let initialComic = Comic(number: 5,
                                  title: "INITIAL Comic",
@@ -31,65 +32,56 @@ struct xkcdMETests {
                                 year: "2020")
         
         @Test func testOriginalState() async throws {
-            #expect(basicViewModel.initialComic == nil)
-            #expect(basicViewModel.comic == nil)
-            #expect(basicViewModel.errorMessage == nil)
-            #expect(basicViewModel.state == .idle)
+            #expect(xkcdHomeViewModel.comic == nil)
+            #expect(xkcdHomeViewModel.state == .idle)
         }
         
         // TODO: think about combining this and the chosenComic success tests into one with parameters
         @Test func testLoadingInitialComicStates() async throws {
-            let initialComicViewModel = MyComicViewModel(networking: MockNetworking(result: .success(initialComic)))
+            let initialComicViewModel = XkcdHomeViewModel(networking: MockNetworking(result: .success(initialComic)))
             
             let task = await initialComicViewModel.loadInitialComic()
-            #expect(initialComicViewModel.state == .loadingInitial)
+            #expect(initialComicViewModel.state == .loading)
             
             await task.value
-            #expect(initialComicViewModel.initialComic?.title == initialComic.title)
-            #expect(initialComicViewModel.comic == nil)
-            #expect(initialComicViewModel.errorMessage == nil)
-            #expect(initialComicViewModel.state == .loadedInitial)
+            #expect(initialComicViewModel.comic?.title == initialComic.title)
+            #expect(initialComicViewModel.userInputError == nil)
+            #expect(initialComicViewModel.state == .loaded)
         }
         
         @Test func testLoadingChosenComicStates() async throws {
             let chosenComicViewModel = MyComicViewModel(networking: MockNetworking(result: .success(chosenComic)))
             
-            let task = await chosenComicViewModel.goToComic(55)
+            let task = await chosenComicViewModel.getComic(number: 55)
             #expect(chosenComicViewModel.state == .loading)
             
             await task.value
-            #expect(chosenComicViewModel.initialComic == nil)
             #expect(chosenComicViewModel.comic?.title == chosenComic.title)
-            #expect(chosenComicViewModel.errorMessage == nil)
+            #expect(chosenComicViewModel.error == nil)
             #expect(chosenComicViewModel.state == .loaded)
         }
         
         @Test func testErrorState() async throws {
             let errorViewModel = MyComicViewModel(networking: MockNetworking(result: .failure(.serverError)))
             
-            let task = await errorViewModel.goToComic(55)
+            let task = await errorViewModel.getComic(number: 55)
             #expect(errorViewModel.state == .loading)
             
             await task.value
-            #expect(errorViewModel.initialComic == nil)
             #expect(errorViewModel.comic == nil)
-            #expect(errorViewModel.errorMessage == ComicError.serverError.message)
-            #expect(errorViewModel.state == .error)
+            #expect(errorViewModel.error == NetworkingError.serverError)
+            #expect(errorViewModel.state == .error(NetworkingError.serverError))
         }
         
         @Test(arguments: [99999999, 0, -55])
         func testBadNumbers(_ number: Int) async throws {
-            let initialComicViewModel = MyComicViewModel(networking: MockNetworking(result: .success(initialComic)))
+            let initialComicViewModel = XkcdHomeViewModel(networking: MockNetworking(result: .success(initialComic)))
 
             let initialTask = await initialComicViewModel.loadInitialComic()
             await initialTask.value
-            let chosenTask = await initialComicViewModel.goToComic(number)
-            await chosenTask.value
+            let isBadNumber = initialComicViewModel.isBadNumber(input: number)
             
-            #expect(initialComicViewModel.initialComic?.title == initialComic.title)
-            #expect(initialComicViewModel.comic == nil)
-            #expect(initialComicViewModel.errorMessage == ComicError.badComicNumber.message)
-            #expect(initialComicViewModel.state == .error)
+            #expect(isBadNumber == true)
         }
     }
     

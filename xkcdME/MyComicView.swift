@@ -19,7 +19,7 @@ struct MyComicView: View {
                     ComicView(myComic: comic)
                 }
             case .error:
-            if let networkingError = viewModel.error as? NetworkingError {
+            if let networkingError = viewModel.error {
                 Text(networkingError.message)
                     .font(.body)
                     .foregroundColor(.red)

@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ComicError: Error {
+protocol ComicError: Error, Equatable {
     var message: String { get }
 }
 
