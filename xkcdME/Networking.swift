@@ -7,8 +7,11 @@
 
 import Foundation
 
-enum ComicError: Error {
-    case badComicNumber
+protocol ComicError: Error {
+    var message: String { get }
+}
+
+enum NetworkingError: ComicError {
     case badURL
     case serverError
     case decodingError
@@ -16,8 +19,6 @@ enum ComicError: Error {
     
     var message: String {
         switch self {
-        case .badComicNumber:
-            return "There is no Comic with that number."
         case .badURL:
             return "The Comic URL is invalid."
         case .serverError:
@@ -26,6 +27,17 @@ enum ComicError: Error {
             return "Failed to decode the Comic."
         case .unknownError:
             return "There was an unknown Comic error."
+        }
+    }
+}
+
+enum UserInputError: ComicError {
+    case badComicNumber
+    
+    var message: String {
+        switch self {
+        case .badComicNumber:
+            return "There is no Comic with that number."
         }
     }
 }
@@ -54,21 +66,29 @@ final class Networking: ComicFetching {
         }
         
         guard let url = URL(string: urlString) else {
-            throw ComicError.badURL
+            throw NetworkingError.badURL
         }
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw ComicError.serverError
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkingError.serverError
+        }
+        
+        switch httpResponse.statusCode {
+        case (200..<299):
+            break
+        case (400..<499):
+            throw NetworkingError.badURL
+        default:
+            throw NetworkingError.serverError
         }
         
         do {
             let comic = try JSONDecoder().decode(Comic.self, from: data)
             return comic
         } catch {
-            throw ComicError.decodingError
+            throw NetworkingError.decodingError
         }
     }
 }
