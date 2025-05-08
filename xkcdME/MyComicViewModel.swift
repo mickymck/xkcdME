@@ -21,15 +21,13 @@ final class MyComicViewModel: ObservableObject {
     }
     
     @MainActor
-    func getComic(number: Int) async -> Task<Void, Never> {
+    func getComic(number: Int) async {
         state = .loading
-        return Task {
-            let _ = await load(comic: number)
-        }
+        await load(comic: number)
     }
     
     @MainActor
-    func load(comic number: Int) async -> Task<Void, Never> {
+    func load(comic number: Int) async {
         do {
             self.comic = try await networking.fetchComic(number: number)
             state = .loaded
@@ -41,6 +39,5 @@ final class MyComicViewModel: ObservableObject {
             self.error = NetworkingError.unknownError
             state = .error(NetworkingError.unknownError)
         }
-        return Task {}
     }
 }
