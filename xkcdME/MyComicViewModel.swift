@@ -11,7 +11,7 @@ import SwiftUI
 @Observable
 final class MyComicViewModel: ObservableObject {
     var comic: Comic?
-    var error: ComicError?
+    var error: NetworkingError?
     var state: ComicLoadingState = .idle
     
     let networking: ComicFetching
@@ -24,12 +24,12 @@ final class MyComicViewModel: ObservableObject {
     func getComic(number: Int) async -> Task<Void, Never> {
         state = .loading
         return Task {
-            await load(comic: number)
+            let _ = await load(comic: number)
         }
     }
     
     @MainActor
-    func load(comic number: Int) async {
+    func load(comic number: Int) async -> Task<Void, Never> {
         do {
             self.comic = try await networking.fetchComic(number: number)
             state = .loaded
@@ -41,5 +41,6 @@ final class MyComicViewModel: ObservableObject {
             self.error = NetworkingError.unknownError
             state = .error(NetworkingError.unknownError)
         }
+        return Task {}
     }
 }

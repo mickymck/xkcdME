@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  XkcdHomeView.swift
 //  xkcdME
 //
 //  Created by Micky McKeon on 5/5/25.
@@ -7,22 +7,20 @@
 
 import SwiftUI
 
-struct XkcdMe: View {
+struct XkcdHomeView: View {
     @State private var comicNumber: Int?
-    @State private var showComic: Bool = false
-    @StateObject private var viewModel = XkcdMeViewModel()
+    @State private var showChosenComic: Bool = false
+    @StateObject private var viewModel = XkcdHomeViewModel()
     
     var body: some View {
         NavigationStack {
             VStack {
                 header()
                 Divider()
-                if let comic = viewModel.comic {
-                    ComicView(myComic: comic)
-                }
+                mainContentView()
                 Spacer()
                 searchSection()
-                .navigationDestination(isPresented: $showComic) {
+                .navigationDestination(isPresented: $showChosenComic) {
                     if let comicNumber {
                         MyComicView(number: comicNumber)
                     }
@@ -30,7 +28,7 @@ struct XkcdMe: View {
                 .navigationTitle("xkcd me")
                 .navigationBarHidden(true)
             }
-            .padding(24)
+            .padding()
             .onAppear {
                 self.comicNumber = nil
                 Task {
@@ -43,10 +41,10 @@ struct XkcdMe: View {
     @ViewBuilder
     private func header() -> some View {
         let subtitle =
-"""
-A webcomic of romance,
-sarcasm, math, and language.
-"""
+            """
+            A webcomic of romance,
+            sarcasm, math, and language.
+            """
         HStack {
             Text("xkcd")
                 .font(Font.custom("American Typewriter", size: 48))
@@ -58,24 +56,27 @@ sarcasm, math, and language.
         }
     }
     
-//    @ViewBuilder
-//    private func mainContentView() -> some View {
-//        switch viewModel.state {
-//        case .loaded:
-//            if let comic = viewModel.comic {
-//                ComicView(myComic: comic)
-//            }
-//        case .error(let error):
-//            Text(error.message)
-//                .font(.body)
-//                .foregroundColor(.red)
-//        case .loading:
-//            ProgressView()
-//                .scaleEffect(2.0, anchor: .center)
-//        case .idle:
-//            EmptyView()
-//        }
-//    }
+    @ViewBuilder
+    private func mainContentView() -> some View {
+        VStack {
+            switch viewModel.state {
+            case .loaded:
+                if let comic = viewModel.comic {
+                    ComicView(myComic: comic)
+                }
+            case .error(let error):
+                Text(error.message)
+                    .font(.body)
+                    .foregroundColor(.red)
+            case .loading:
+                ProgressView()
+                    .scaleEffect(2.0, anchor: .center)
+            case .idle:
+                EmptyView()
+            }
+        }
+        .frame(maxHeight: .infinity)
+    }
     
     @ViewBuilder
     private func searchSection() -> some View {
@@ -126,6 +127,7 @@ sarcasm, math, and language.
             }
             .frame(height: 40)
         }
+        .padding()
     }
     
     private func checkNumberAndGoToComic() {
@@ -134,12 +136,12 @@ sarcasm, math, and language.
                 viewModel.userInputError = .badComicNumber
             } else {
                 viewModel.userInputError = nil
-                self.showComic = true
+                self.showChosenComic = true
             }
         }
     }
 }
 
 #Preview {
-    XkcdMe()
+    XkcdHomeView()
 }

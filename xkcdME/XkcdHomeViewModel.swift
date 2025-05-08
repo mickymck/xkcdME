@@ -1,5 +1,5 @@
 //
-//  XkcdMeViewModel.swift
+//  XkcdHomeViewModel.swift
 //  xkcdME
 //
 //  Created by Micky McKeon on 5/7/25.
@@ -12,11 +12,28 @@ enum ComicLoadingState {
     case idle
     case loading
     case loaded
-    case error(ComicError)
+    case error(any ComicError)
+}
+
+extension ComicLoadingState: Equatable {
+    static func == (lhs: ComicLoadingState, rhs: ComicLoadingState) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle),
+             (.loading, .loading),
+             (.loaded, .loaded):
+            return true
+        case let (.error(lhsError as NetworkingError), .error(rhsError as NetworkingError)):
+            return lhsError == rhsError
+        case let (.error(lhsError as UserInputError), .error(rhsError as UserInputError)):
+            return lhsError == rhsError
+        default:
+            return false
+        }
+    }
 }
 
 @Observable
-final class XkcdMeViewModel: ObservableObject {
+final class XkcdHomeViewModel: ObservableObject {
     var comic: Comic?
     var userInputError: UserInputError?
     var state: ComicLoadingState = .idle
