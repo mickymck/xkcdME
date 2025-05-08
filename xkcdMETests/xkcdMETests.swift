@@ -22,7 +22,6 @@ struct xkcdMETests {
             #expect(xkcdHomeViewModel.state == .idle)
         }
         
-        // TODO: think about combining this and the chosenComic success tests into one with parameters
         @Test func testLoadingInitialComic() async throws {
             let initialComicViewModel = XkcdHomeViewModel(networking: MockNetworking(result: .success(MockComic.initial)))
             

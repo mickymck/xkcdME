@@ -57,7 +57,9 @@ final class XkcdHomeViewModel: ObservableObject {
         }
     }
     
-    // TODO: make this non-optional?
+    /// should return optional, because I don't want to make a determination on the input number
+    /// one way or the other if the original comic didn't load (and we don't have our upper limit)
+    /// we still have the Networking response to handle bad numbers if the initial Comic fails
     @MainActor
     func isBadNumber(input: Int) -> Bool? {
         if let comic {
