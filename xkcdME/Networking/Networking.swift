@@ -37,20 +37,28 @@ extension ComicFetching {
     }
 }
 
+struct ComicUrlBuilder {
+    private let base = "https://xkcd.com"
+    private let pathSuffix = "info.0.json"
+    
+    func url(for number: Int? = nil) -> URL? {
+        let pathComponent = number.map { "/\($0)/" } ?? "/"
+        let fullString = base + pathComponent + pathSuffix
+        return URL(string: fullString)
+    }
+}
+
+
 final class Networking: ComicFetching {
     static let shared = Networking()
     
     private init() {}
     
     func fetchComic(number: Int? = nil) async throws -> Comic {
-        // TODO: get rid of hard-coded string here?
-        var urlString = "https://xkcd.com/info.0.json"
         
-        if let number {
-            urlString = "https://xkcd.com/\(number)/info.0.json"
-        }
+        let builder = ComicUrlBuilder()
         
-        guard let url = URL(string: urlString) else {
+        guard let url = builder.url(for: number) else {
             throw NetworkingError.badURL
         }
         
