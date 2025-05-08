@@ -8,26 +8,20 @@
 import Foundation
 import SwiftUI
 
-enum ComicLoadingState {
+enum ComicLoadingState: Equatable {
     case idle
     case loading
     case loaded
-    case error(any ComicError)
+    case error(NetworkingError)
 }
 
-extension ComicLoadingState: Equatable {
-    static func == (lhs: ComicLoadingState, rhs: ComicLoadingState) -> Bool {
-        switch (lhs, rhs) {
-        case (.idle, .idle),
-             (.loading, .loading),
-             (.loaded, .loaded):
-            return true
-        case let (.error(lhsError as NetworkingError), .error(rhsError as NetworkingError)):
-            return lhsError == rhsError
-        case let (.error(lhsError as UserInputError), .error(rhsError as UserInputError)):
-            return lhsError == rhsError
-        default:
-            return false
+enum UserInputError: Error {
+    case badComicNumber
+    
+    var message: String {
+        switch self {
+        case .badComicNumber:
+            return "There is no Comic with that number."
         }
     }
 }
@@ -35,7 +29,7 @@ extension ComicLoadingState: Equatable {
 @Observable
 final class XkcdHomeViewModel: ObservableObject {
     var comic: Comic?
-    var userInputError: UserInputError?
+    var error: UserInputError?
     var state: ComicLoadingState = .idle
     
     let networking: ComicFetching

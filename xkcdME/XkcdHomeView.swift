@@ -87,7 +87,7 @@ struct XkcdHomeView: View {
             return "Comic #"
         }
         VStack(alignment: .leading) {
-            if let error = viewModel.userInputError {
+            if let error = viewModel.error {
                 VStack {
                     Text(error.message)
                         .font(.footnote)
@@ -133,9 +133,9 @@ struct XkcdHomeView: View {
     private func checkNumberAndGoToComic() {
         if let comicNumber {
             if viewModel.isBadNumber(input: comicNumber) == true {
-                viewModel.userInputError = .badComicNumber
+                viewModel.error = .badComicNumber
             } else {
-                viewModel.userInputError = nil
+                viewModel.error = nil
                 self.showChosenComic = true
             }
         }

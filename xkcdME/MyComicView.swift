@@ -24,9 +24,11 @@ struct MyComicView: View {
                     .font(.body)
                     .foregroundColor(.red)
             }
-            case .loading, .idle:
+            case .loading:
                 ProgressView()
                     .scaleEffect(2.0, anchor: .center)
+            case .idle:
+                EmptyView()
             }
         }
         .padding()
