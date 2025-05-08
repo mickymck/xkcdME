@@ -96,4 +96,20 @@ struct xkcdMETests {
             #expect(date == nil)
         }
     }
+    
+    @Suite("URL Builder Tests")
+    struct URLBuilderTests {
+        
+        let builder = ComicUrlBuilder()
+
+        @Test func urlWithNumbertest() async throws {
+            let url = builder.url(for: 55)
+            #expect(url == URL(string: "https://xkcd.com/55/info.0.json"))
+        }
+        
+        @Test func urlWithNoNumbertest() async throws {
+            let url = builder.url()
+            #expect(url == URL(string: "https://xkcd.com/info.0.json"))
+        }
+    }
 }
