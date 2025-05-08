@@ -39,12 +39,10 @@ final class XkcdHomeViewModel: ObservableObject {
     }
     
     @MainActor
-    func loadInitialComic() async -> Task<Void, Never> {
-        guard comic == nil else { return Task {} }
+    func loadInitialComic() async {
+        guard comic == nil else { return }
         state = .loading
-        return Task {
-            await load()
-        }
+        await load()
     }
     
     @MainActor
@@ -60,6 +58,7 @@ final class XkcdHomeViewModel: ObservableObject {
     }
     
     // TODO: make this non-optional?
+    @MainActor
     func isBadNumber(input: Int) -> Bool? {
         if let comic {
             return (input > comic.number || input < 1)

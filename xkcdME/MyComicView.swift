@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct MyComicView: View {
+
+    @StateObject private var viewModel: MyComicViewModel
     let number: Int
-    let viewModel = MyComicViewModel()
+    
+    init(number: Int, networking: ComicFetching = Networking.shared) {
+        _viewModel = StateObject(wrappedValue: MyComicViewModel(networking: networking))
+        self.number = number
+    }
 
     var body: some View {
         VStack {
@@ -33,11 +39,11 @@ struct MyComicView: View {
         }
         .padding()
         .task {
-            _ = await viewModel.getComic(number: number)
+            await viewModel.getComic(number: number)
         }
     }
 }
 
 #Preview {
-    MyComicView(number: 15)
+    MyComicView(number: 15, networking: MockNetworking(result: .success(MockComic.chosen)))
 }

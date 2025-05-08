@@ -10,7 +10,11 @@ import SwiftUI
 struct XkcdHomeView: View {
     @State private var comicNumber: Int?
     @State private var showChosenComic: Bool = false
-    @StateObject private var viewModel = XkcdHomeViewModel()
+    @StateObject private var viewModel: XkcdHomeViewModel
+    
+    init(networking: ComicFetching = Networking.shared) {
+        _viewModel = StateObject(wrappedValue: XkcdHomeViewModel(networking: networking))
+    }
     
     var body: some View {
         NavigationStack {
@@ -32,7 +36,7 @@ struct XkcdHomeView: View {
             .onAppear {
                 self.comicNumber = nil
                 Task {
-                    _ = await viewModel.loadInitialComic()
+                    await viewModel.loadInitialComic()
                 }
             }
         }
@@ -143,5 +147,5 @@ struct XkcdHomeView: View {
 }
 
 #Preview {
-    XkcdHomeView()
+    XkcdHomeView(networking: MockNetworking(result: .success(MockComic.initial)))
 }
